@@ -8,6 +8,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import model.JdbcTemplateConst;
 
+/*
+JdbcTemplate 관련 주요메소드
+
+- List query(String sql, RowMapper rowMapper)
+	: 여러개의 레코드를 반환하는 select 계열의 쿼리문인 경우 사용한다.
+*/
 public class JDBCTemplateDAO {
 	
 	//멤버변수
