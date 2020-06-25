@@ -7,10 +7,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import model.JdbcTemplateConst;
 import springboard.command.BbsCommandImpl;
 import springboard.command.ListCommand;
+import springboard.command.ViewCommand;
+import springboard.command.WriteActionCommand;
+import springboard.model.JDBCTemplateDAO;
+import springboard.model.SpringBbsDTO;
 
 /*
 @Autowired
@@ -61,6 +66,71 @@ public class BbsController {
 		command.execute(model);
 		
 		return "07Board/list";
+	}
+	
+	@RequestMapping("/board/write.do")
+	public String write(Model model) {
+		
+		return "07Board/write";
+	}
+	
+	/*
+	글쓰기처리 : post로 전송되므로 두가지 속성을 모두 사용하여 매핑
+	*/
+	@RequestMapping(value = "/board/writeAction.do", method = RequestMethod.POST)
+	public String writeAction(Model model, HttpServletRequest req, SpringBbsDTO springBbsDTO) {
+		
+		//request객체를 모델에 저장
+		model.addAttribute("req", req);
+		//View에서 전송한 폼값을 한꺼번에 저장한 커맨드객체로 DTO를 저장
+		model.addAttribute("springBbsDTO", springBbsDTO);
+		command = new WriteActionCommand();
+		command.execute(model);
+		
+		//글쓰기 처리 완료 후 list.do로 로케이션(이동) 된다.
+		return "redirect:list.do?nowPage=1";
+	}
+	
+	@RequestMapping("/board/view.do")
+	public String view(Model model, HttpServletRequest req) {
+		
+		model.addAttribute("req", req);
+		command = new ViewCommand();
+		command.execute(model);
+		
+		return "07Board/view";
+	}
+	
+	@RequestMapping("/board/password.do")
+	public String password(Model model, HttpServletRequest req) {
+		
+		model.addAttribute("idx", req.getParameter("idx"));
+		return "07Board/password";
+	}
+	
+	@RequestMapping("/board/passwordAction.do")
+	public String passwordAction(Model model, HttpServletRequest req) {
+		
+		String modePage = null;
+		
+		String mode = req.getParameter("mode");
+		String idx= req.getParameter("idx");
+		String nowPage = req.getParameter("nowPage");
+		String pass = req.getParameter("pass");
+		
+		JDBCTemplateDAO dao = new JDBCTemplateDAO();
+		
+		int rowExist = dao.password(idx, pass);
+		
+		if(rowExist <= 0) {
+			model.addAttribute("isCorrMsg", "패스워드가 일치하지 않습니다.");
+			model.addAttribute("idx", idx);
+			modePage = "07Board/password";
+		}
+		else {
+			System.out.println("검증완료");
+		}
+		return modePage;
 	}
 	
 }

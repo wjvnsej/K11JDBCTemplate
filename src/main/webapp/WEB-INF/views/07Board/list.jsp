@@ -53,7 +53,7 @@ $(function(){
 	
 	<!-- table>tr*2>td*5 -->
 	<table border="1" width="90%">
-		<tr>
+		<tr align="center">
 			<th width="10%">번호</th>
 			<th width="*">제목</th>
 			<th width="15%">작성자</th>
@@ -80,8 +80,8 @@ $(function(){
 								&nowPage=${nowPage}">${row.title}</a>
 						</td>
 						<td class="text-center">${row.name }</td>
-						<td class="text-center">${row.postdate }</td>
 						<td class="text-center">${row.hits }</td>
+						<td class="text-center">${row.postdate }</td>
 						<!-- <td class="text-center">--</td> -->
 					</tr>
 					<!-- 리스트반복끝 -->
