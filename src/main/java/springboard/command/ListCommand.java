@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import springboard.model.JDBCTemplateDAO;
@@ -14,6 +15,7 @@ import springboard.model.SpringBbsDTO;
 BbsCommandImpl를 구현하였으므로 execute()메소드는 반드시 오버라이딩 해야한다.
 또한 해당 객체는 부모타입인 BbsCommandImpl로 참조할 수 있다.
  */
+@Service("BbsCommandImpl")
 public class ListCommand implements BbsCommandImpl {
 	
 	/*
@@ -63,6 +65,18 @@ public class ListCommand implements BbsCommandImpl {
 			//전체게시물의 갯수에서 하나씩 차감하면서 가상번호 부여
 			virtualNum = totalRecordCount --;
 			row.setVirtualNum(virtualNum);
+			
+			//답변글에 대한 리스트 처리(re.gif 이미지를 제목에 삽입)
+			String reSpace = "";
+			//해당 게시물의 indent가 0보다 크다면(답변글이라면)...
+			if(row.getBindent() > 0) {
+				//indent의 크기만큼 공백(&nbsp;)을 추가해준다.
+				for(int i = 0; i < row.getBindent(); i++) {
+					reSpace += "&nbsp;&nbsp;";
+				}
+				//reply이미지를 추가해준다.
+				row.setTitle(reSpace + "<img src='../images/re3.gif'>" + row.getTitle());
+			}
 		}
 		
 		//model객체에 출력리스트 저장
