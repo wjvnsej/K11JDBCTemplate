@@ -84,6 +84,33 @@ public class JDBCTemplateDAO {
 				.query(sql, new BeanPropertyRowMapper<SpringBbsDTO>(SpringBbsDTO.class));
 	}
 	
+	//게시판 리스트(페이지처리O)
+	public ArrayList<SpringBbsDTO> listPage(
+			Map<String, Object> map){
+
+		int start = Integer.parseInt(map.get("start").toString());
+		int end = Integer.parseInt(map.get("end").toString());
+		
+		String sql = ""
+				+"SELECT * FROM ("
+				+"    SELECT Tb.*, rownum rNum FROM ("
+				+"        SELECT * FROM springboard ";				
+			if(map.get("Word")!=null){
+				sql +=" WHERE "+map.get("Column")+" "
+					+ " LIKE '%"+map.get("Word")+"%' ";				
+			}			
+			sql += " ORDER BY bgroup DESC, bstep ASC"
+			+"    ) Tb"
+			+")"
+			+" WHERE rNum BETWEEN "+start+" and "+end;
+		
+		return (ArrayList<SpringBbsDTO>)
+			template.query(sql, 
+				new BeanPropertyRowMapper<SpringBbsDTO>(
+				SpringBbsDTO.class));
+	}
+
+	
 	//글쓰기 처리1
 	public void write(final SpringBbsDTO springBbsDTO) {
 		

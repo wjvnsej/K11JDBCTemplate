@@ -10,6 +10,8 @@ import org.springframework.ui.Model;
 
 import springboard.model.JDBCTemplateDAO;
 import springboard.model.SpringBbsDTO;
+import springboard.util.EnvFileReader;
+import springboard.util.PagingUtil;
 
 /*
 BbsCommandImpl를 구현하였으므로 execute()메소드는 반드시 오버라이딩 해야한다.
@@ -53,8 +55,32 @@ public class ListCommand implements BbsCommandImpl {
 		//전체 레코드 수 카운트하기
 		int totalRecordCount = dao.getTotalCount(paramMap);
 		
+		///////////////////////////////////////////////////////////
+		//페이지 처리부분 Start
+		
+		//Environment객체를 이용한 외부파일 읽어오기
+		int pageSize = Integer.parseInt(EnvFileReader.getValue("SpringBbsInit.properties", "SpringBoard.pageSize"));
+		int blockPage = Integer.parseInt(EnvFileReader.getValue("SpringBbsInit.properties", "SpringBoard.blockPage"));
+		
+		//전체페이지 수 계산
+		int totalPage = (int)Math.ceil((double)totalRecordCount / pageSize);
+		
+		//현재 페이지 번호. 첫 진입이라면 무조건 1페이지로 지정
+		int nowPage = req.getParameter("nowPage") == null ? 1 : Integer.parseInt(req.getParameter("nowPage"));
+		
+		//리스트에 출력 할 게시물의 시작/종료 구간(select절의 between에
+		int start = (nowPage - 1) * pageSize + 1;
+		int end = nowPage * pageSize;
+		
+		paramMap.put("start", start);
+		paramMap.put("end", end);
+		
+		//페이지 처리부분 End
+		///////////////////////////////////////////////////////////
+		
 		//출력할 리스트 가져오기
-		ArrayList<SpringBbsDTO> listRows = dao.list(paramMap);
+		//ArrayList<SpringBbsDTO> listRows = dao.list(paramMap); //페이지X
+		ArrayList<SpringBbsDTO> listRows = dao.listPage(paramMap); //페이지O
 		
 		//가상번호 계산하여 부여하기
 		int virtualNum = 0;
@@ -63,7 +89,10 @@ public class ListCommand implements BbsCommandImpl {
 		for(SpringBbsDTO row : listRows) {
 			
 			//전체게시물의 갯수에서 하나씩 차감하면서 가상번호 부여
-			virtualNum = totalRecordCount --;
+			//virtualNum = totalRecordCount --;
+			
+			//페이지번호 적용하여 가상번호 계산
+			virtualNum = totalRecordCount - (((nowPage - 1) * pageSize) + countNum++);
 			row.setVirtualNum(virtualNum);
 			
 			//답변글에 대한 리스트 처리(re.gif 이미지를 제목에 삽입)
@@ -80,6 +109,11 @@ public class ListCommand implements BbsCommandImpl {
 		}
 		
 		//model객체에 출력리스트 저장
+		String path = req.getContextPath() + "/board/list.do?" + addQueryString;
+		String pagingImg = PagingUtil.pagingImg(totalRecordCount, pageSize, blockPage, nowPage, path);
+		model.addAttribute("pagingImg", pagingImg);
+		model.addAttribute("totalPage", totalPage); //전체페이지수
+		model.addAttribute("nowPage", nowPage);		//현재페이지번호
 		model.addAttribute("listRows", listRows);
 		
 		//JDBCTemplate에서는 자원반납을 하지 않는다.
