@@ -4,14 +4,22 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import springboard.model.JDBCTemplateDAO;
 
-@Service("BbsCommandImpl")
+@Service
 public class DeleteActionCommand implements BbsCommandImpl {
 
+	JDBCTemplateDAO dao;
+	@Autowired
+	public void setDao(JDBCTemplateDAO dao) {
+		this.dao = dao;
+		System.out.println("JDBCTemplateDAO 자동주입(DeleteAction)");
+	}
+	
 	@Override
 	public void execute(Model model) {
 		
@@ -21,7 +29,7 @@ public class DeleteActionCommand implements BbsCommandImpl {
 		String idx = req.getParameter("idx");
 		String pass = req.getParameter("pass");
 		
-		JDBCTemplateDAO dao = new JDBCTemplateDAO();
+//		JDBCTemplateDAO dao = new JDBCTemplateDAO();
 		
 		dao.delete(idx, pass);
 	}

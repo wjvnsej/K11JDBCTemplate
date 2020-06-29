@@ -4,14 +4,22 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import springboard.model.JDBCTemplateDAO;
 import springboard.model.SpringBbsDTO;
 
-@Service("BbsCommandImpl")
+@Service
 public class WriteActionCommand implements BbsCommandImpl {
+	
+	JDBCTemplateDAO dao;
+	@Autowired
+	public void setDao(JDBCTemplateDAO dao) {
+		this.dao = dao;
+		System.out.println("JDBCTemplateDAO 자동주입(WriteAction)");
+	}
 	
 	@Override
 	public void execute(Model model) {
@@ -25,7 +33,7 @@ public class WriteActionCommand implements BbsCommandImpl {
 		System.out.println("springBbsDTO.title = " + springBbsDTO.getTitle());
 		
 		//DAO객체 생성 후 insert처리
-		JDBCTemplateDAO dao = new JDBCTemplateDAO();
+//		JDBCTemplateDAO dao = new JDBCTemplateDAO();
 		dao.write(springBbsDTO);
 		dao.close();
 		
